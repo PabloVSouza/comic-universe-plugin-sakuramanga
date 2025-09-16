@@ -24,15 +24,34 @@ This is a plugin for [**Comic Universe**](https://github.com/pablovsouza/comic-u
 
 The plugin provides a web scraping interface to browse, search, and read manga from SakuraManga's website directly within the Comic Universe app.
 
+## ⚠️ Important Notice
+
+**This plugin is currently affected by Cloudflare protection on sakuramangas.org**. The website uses anti-bot measures that prevent automated scraping. This is a common issue with many manga websites.
+
 ## ✨ Features (v1.0.0)
 
-- **Browse manga** - Get latest manga from the homepage
-- **Search functionality** - Find manga by title
+- **Browse manga** - Get latest manga from the homepage *(when accessible)*
+- **Search functionality** - Find manga by title *(when accessible)*
 - **Detailed information** - Synopsis, genres, author, and status
 - **Chapter listings** - Complete chapter lists with proper sorting  
 - **Page reading** - Full manga page image support
 - **Flexible scraping** - Multiple selector patterns for robust parsing
 - **Error handling** - Graceful fallbacks when specific patterns fail
+- **Cloudflare detection** - Detects and reports when website is protected
+
+## 🔧 Current Limitations
+
+Due to Cloudflare protection on sakuramangas.org:
+- The plugin may return empty results
+- Console will show "Cloudflare protection active" messages
+- Website requires JavaScript challenges that can't be automated
+
+## 🛠️ Potential Solutions
+
+1. **Wait for protection changes** - Sometimes sites reduce protection levels
+2. **Use proxy services** - Some proxy services can bypass basic protection
+3. **Alternative websites** - Consider using other manga sites with similar content
+4. **Manual browsing** - Use the website directly in a browser when needed
 
 ### How to install this plugin?
 

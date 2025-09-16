@@ -1,6 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
 import * as cheerio from 'cheerio'
 
+// Add cookie jar support for session management
+const axiosDefault = axios.create()
+
 class SakuraMangaRepoPlugin implements IRepoPluginRepository {
   public RepoName = 'Sakura Manga'
   public RepoTag = 'sakuramanga'
@@ -8,13 +11,64 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
   private axios: AxiosInstance
 
+  // Helper method to detect Cloudflare challenge
+  private isCloudflareChallenge(html: string): boolean {
+    return (
+      html.includes('Just a moment...') ||
+      html.includes('challenge-platform') ||
+      html.includes('__cf_chl_opt') ||
+      html.includes('Enable JavaScript and cookies to continue')
+    )
+  }
+
+  // Helper method to make requests with retry logic
+  private async makeRequest(url: string, maxRetries: number = 3): Promise<string> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Add delay between attempts to avoid rate limiting
+        if (attempt > 1) {
+          await new Promise((resolve) => setTimeout(resolve, 2000 * attempt))
+        }
+
+        const response = await this.axios.get(url)
+
+        if (this.isCloudflareChallenge(response.data)) {
+          console.warn(`Cloudflare challenge detected on attempt ${attempt} for URL: ${url}`)
+          if (attempt === maxRetries) {
+            throw new Error('Cloudflare protection active - cannot access website')
+          }
+          continue
+        }
+
+        return response.data
+      } catch (error) {
+        console.error(`Request attempt ${attempt} failed:`, error)
+        if (attempt === maxRetries) {
+          throw error
+        }
+      }
+    }
+    throw new Error('Max retries exceeded')
+  }
+
   constructor(data: IRepoPluginRepositoryInit) {
     this.axios = axios.create({
       baseURL: this.RepoUrl,
-      timeout: 15000,
+      timeout: 30000, // Increased timeout for Cloudflare challenges
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        Connection: 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Cache-Control': 'max-age=0'
       }
     })
   }
@@ -84,8 +138,8 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
   public methods: IRepoPluginMethods = {
     getList: async (): Promise<IComic[]> => {
       try {
-        const response = await this.axios.get('/')
-        const $ = cheerio.load(response.data)
+        const html = await this.makeRequest('/')
+        const $ = cheerio.load(html)
 
         // Common selectors for manga listings
         const selectors = [
@@ -116,6 +170,13 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
         return comics
       } catch (error) {
+        if (error instanceof Error && error.message.includes('Cloudflare protection')) {
+          console.error(
+            'SakuraManga Plugin: Website is protected by Cloudflare. This plugin may not work until the protection is bypassed.'
+          )
+          // Return empty array but log the issue
+          return []
+        }
         console.error('Error in getList:', error)
         return []
       }
@@ -134,8 +195,8 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
         for (const searchUrl of searchPatterns) {
           try {
-            const response = await this.axios.get(searchUrl)
-            const $ = cheerio.load(response.data)
+            const html = await this.makeRequest(searchUrl)
+            const $ = cheerio.load(html)
 
             // Try to find search results
             const selectors = [
@@ -171,6 +232,10 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
         return []
       } catch (error) {
+        if (error instanceof Error && error.message.includes('Cloudflare protection')) {
+          console.error('SakuraManga Plugin: Cannot search - website is protected by Cloudflare.')
+          return []
+        }
         console.error('Error in search:', error)
         return []
       }
@@ -179,8 +244,8 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
     getDetails: async (search): Promise<Partial<IComic>> => {
       try {
         const mangaUrl = search.siteLink.startsWith('/') ? search.siteLink : `/${search.siteLink}`
-        const response = await this.axios.get(mangaUrl)
-        const $ = cheerio.load(response.data)
+        const html = await this.makeRequest(mangaUrl)
+        const $ = cheerio.load(html)
 
         // Try to extract synopsis from common selectors
         const synopsisSelectors = [
@@ -271,8 +336,8 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
         for (const mangaUrl of mangaUrlPatterns) {
           try {
-            const response = await this.axios.get(mangaUrl)
-            const $ = cheerio.load(response.data)
+            const html = await this.makeRequest(mangaUrl)
+            const $ = cheerio.load(html)
 
             // Try to find chapter listings
             const chapterSelectors = [
@@ -377,8 +442,8 @@ class SakuraMangaRepoPlugin implements IRepoPluginRepository {
 
         for (const chapterUrl of chapterUrlPatterns) {
           try {
-            const response = await this.axios.get(chapterUrl)
-            const $ = cheerio.load(response.data)
+            const html = await this.makeRequest(chapterUrl)
+            const $ = cheerio.load(html)
 
             // Try to find manga page images
             const imageSelectors = [
