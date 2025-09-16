@@ -8,7 +8,7 @@
   "description": "Plugin for supporting Sakura Manga as a repository",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pablovsouza/comic-universe-plugin-sakuramanga.git"
+    "url": "git+https://github.com/PabloVSouza/comic-universe-plugin-sakuramanga.git"
   },
   "keywords": [
     "comic-universe",
