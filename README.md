@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://github.com/pablovsouza/comic-universe/blob/main/src/renderer/assets/icon.svg?raw=true" width="200">
-  <h1>Comic Universe Plugin Template</h1>
+  <h1>Comic Universe Plugin - SakuraManga</h1>
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" />
   <a href="https://github.com/prisma/prisma/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" /></a>
   <a href="https://discord.gg/gPsQkDGDfc"><img alt="Discord" src="https://img.shields.io/discord/1270554232260526120?label=Discord"></a>
@@ -18,32 +18,47 @@
   <hr />
 </div>
 
-## What is this for?
+## What is this?
 
-This project is a base template for creating comic repositories for the app [**Comic Universe**](https://github.com/pablovsouza/comic-universe).
+This is a plugin for [**Comic Universe**](https://github.com/pablovsouza/comic-universe) that enables reading manga from **sakuramangas.org**.
 
-Feel free to fork this repository and start developing your own plugin, just following the typescript interfaces provided, as well as **being compatible with NPM**.
+The plugin provides a web scraping interface to browse, search, and read manga from SakuraManga's website directly within the Comic Universe app.
 
-Please avoid using unnecessary dependencies, as it would make the main app heavier.
+## ✨ Features (v1.0.0)
 
-## ✨ Latest Updates (v0.1.0)
+- **Browse manga** - Get latest manga from the homepage
+- **Search functionality** - Find manga by title
+- **Detailed information** - Synopsis, genres, author, and status
+- **Chapter listings** - Complete chapter lists with proper sorting  
+- **Page reading** - Full manga page image support
+- **Flexible scraping** - Multiple selector patterns for robust parsing
+- **Error handling** - Graceful fallbacks when specific patterns fail
 
-- **Updated TypeScript interfaces** to match Comic Universe 2.0+
-- **Enhanced IComic interface** with new settings system for reading preferences
-- **Per-comic customization** support for reading mode and direction
-- **Improved type safety** with proper TypeScript 5.9+ support
-- **Better plugin integration** with latest architecture
+### How to install this plugin?
 
-### How can i test the plugin?
+1. **Download the plugin package**:
+   - Download the latest `.tgz` file from the [releases page](https://github.com/PabloVSouza/comic-universe-plugin-sakuramanga/releases)
+   - Or clone this repository and run `npm run build` to generate the package
 
-Comic Universe (Only on version 2.0 onwards) will look for the folder called **plugins**, inside the **comic-universe** folder, on the following path:
+2. **Install in Comic Universe**:
+   Comic Universe (version 2.0+) looks for plugins in the following folder:
+   - **macOS**: `~/library/application-support/comic-universe/plugins`
+   - **Windows**: `%appdata%/comic-universe/plugins`
 
-- On Macs, its "**~/library/application-support/comic-universe/plugins**"
-- On Windows, its "**%appdata%/comic-universe/plugins**"
+3. **Extract the plugin**:
+   - Extract the plugin folder to the plugins directory
+   - The app should automatically recognize and load the plugin
 
-Just put your plugin folder there and the app should recognize the files.
+### Development
 
-**Make sure to fill the package.json properly, so the app can use it's metadata.**
+To modify or contribute to this plugin:
+
+```bash
+git clone https://github.com/PabloVSouza/comic-universe-plugin-sakuramanga.git
+cd comic-universe-plugin-sakuramanga
+npm install
+npm run build
+```
 
 ### What if i'm stuck?
 
