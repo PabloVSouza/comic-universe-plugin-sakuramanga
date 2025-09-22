@@ -10,6 +10,20 @@ interface IRepoPluginMethods {
   }): Promise<{ cover: string; pageFiles: IPage[] }>
 }
 
+interface ICloudflareChallenge {
+  type: 'captcha' | 'challenge' | 'verification'
+  url: string
+  title: string
+  message: string
+  requiresUserInteraction: boolean
+}
+
+interface IUserInteractionCallback {
+  showCloudflareChallenge(challenge: ICloudflareChallenge): Promise<boolean>
+  showError(message: string, details?: string): Promise<void>
+  showProgress(message: string): Promise<void>
+}
+
 interface IRepoPluginRepository {
   RepoName: string
   RepoUrl: string
@@ -24,6 +38,7 @@ interface IRepoPluginRepositoryConstruct {
 interface IRepoPluginRepositoryInit {
   path: string
   url: string
+  userInteraction?: IUserInteractionCallback
 }
 
 interface IRepoPluginInfo {
